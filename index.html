@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stormwater Intelligence AI Training & Audit Core - by Daniel Guzman</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Soothing Neutrals -->
+    <!-- Application Structure Plan: This console is designed as the MLOps Training & Audit Core. The structure prioritizes data lineage and the human-in-the-loop (HIL) process. The tabs represent the four pillars of a robust, auditable AI system: 1. Diagnostics (Metrics), 2. Execution History (Audit Log/Lineage), 3. Data Integrity (Feature Store Gate), and 4. Expert Correction (Governance/HIL). All metrics are intentionally blank, forcing connection to a live MLOps backend. -->
+    <!-- Visualization & Content Choices: Charts are initialized empty, waiting for real data streams (BSS, Anomaly Count, etc.). Buttons trigger real file generation (Export/Import) and critical system events (Model Promotion, API Check), all of which are logged for AI training and compliance. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .workflow-step {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .workflow-step.active {
+            background-color: #3D405B;
+            color: #FFFFFF;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .workflow-step.active .step-icon {
+            color: #81C3D7;
+        }
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-btn.active {
+            background-color: #3D405B;
+            color: #FFFFFF;
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .nav-btn.active-tab {
+            background-color: #3D405B;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+        .main-section {
+            display: none;
+        }
+        .main-section.active {
+            display: block;
+        }
+        .table-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .table-header:hover {
+            background-color: #e5e7eb;
+        }
+        .data-link {
+            color: #3D405B;
+            text-decoration: underline;
+            text-decoration-color: #81C3D7;
+            text-underline-offset: 4px;
+            transition: color 0.2s, text-decoration-color 0.2s;
+        }
+        .data-link:hover {
+            color: #E07A5F;
+            text-decoration-color: #E07A5F;
+        }
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #81C3D7;
+        }
+        /* Custom Styles for Automation Flow */
+        .flow-card {
+            min-height: 150px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .flow-arrow {
+            font-size: 40px;
+            line-height: 1;
+            color: #81C3D7;
+            transition: color 0.5s;
+        }
+        .log-running {
+            color: #3B82F6; /* blue */
+            animation: pulse-blue 1s infinite;
+        }
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .latency-text {
+            transition: color 0.5s;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
+                <span class="text-[#3D405B]">Stormwater Intelligence AI Training & Audit Core</span>
+            </div>
+            <div id="main-nav" class="flex flex-wrap justify-center space-x-2 md:space-x-6">
+                <button data-target="dashboard" class="nav-btn active-tab">Model Skill & Bias Analysis</button>
+                <button data-target="workflow" class="nav-btn">Orchestration & Feature Lineage</button>
+                <button data-target="data-sources" class="nav-btn">Feature Store & Ground Truth Integrity</button>
+                <button data-target="expertise" class="nav-btn">Governance & Human Feedback Loop</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- DASHBOARD (Initial View) - AI Training Focus -->
+        <div id="dashboard" class="main-section active">
+            <section class="text-center py-16">
+                <h1 class="text-5xl md:text-6xl font-extrabold text-[#3D405B] leading-tight">
+                    AI Diagnostic Core: Skill Score & Bias Analysis
+                </h1>
+                <p class="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">This dashboard provides the key metrics necessary for the AI to self-diagnose performance degradation and data drift, triggering the Continuous Training (CT) cycle.</p>
+                <p class="mt-2 text-md text-gray-500">System Developed by Daniel Guzman</p>
+            </section>
+            
+            <section id="model-health" class="py-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3D405B]">Model Health Indicators (Live Metrics)</h2>
+                    <p class="mt-2 text-lg text-gray-600">These metrics must be populated via a live stream from the MLOps backend to accurately assess model state for training purposes.</p>
+                </div>
+                
+                <div class="grid md:grid-cols-4 gap-8 mb-12">
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500">
+                        <h3 class="font-bold text-lg mb-1 text-[#3D405B]">Current Model Skill (BSS)</h3>
+                        <p class="text-4xl font-extrabold text-green-600" id="skill-score">---</p>
+                        <p class="text-sm text-gray-500">Brier Skill Score: Measures reliability. Decay below 0.8 requires action. <span class="font-bold text-red-500">(Threshold Delta: ---)</span></p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-yellow-500">
+                        <h3 class="font-bold text-lg mb-1 text-[#3D405B]">Input Feature Drift</h3>
+                        <p class="text-4xl font-extrabold text-yellow-600" id="feature-drift">---</p>
+                        <p class="text-sm text-gray-500">Indicates shift in feature distribution. Threshold: 5.0% (CT Alert). <span class="font-bold text-red-500">(Threshold Delta: ---)</span></p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                        <h3 class="font-bold text-lg mb-1 text-[#3D405B]">Data Quality Index</h3>
+                        <p class="text-4xl font-extrabold text-blue-600" id="data-quality-index">---</p>
+                        <p class="text-sm text-gray-500">Aggregate score of feature completeness and low latency. <span class="font-bold text-red-500">(Threshold Delta: ---)</span></p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-red-500">
+                        <h3 class="font-bold text-lg mb-1 text-[#3D405B]">Prediction Bias Score</h3>
+                        <p class="text-4xl font-extrabold text-red-600" id="prediction-bias">---</p>
+                        <p class="text-sm text-gray-500">Deviation from null hypothesis (neutral prediction). High bias requires audit. <span class="font-bold text-red-500">(Threshold Delta: ---)</span></p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="font-bold text-xl mb-4 text-[#3D405B]">Experiment Tracking: Model Skill Comparison</h3>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <label for="experiment-select" class="font-semibold text-sm text-gray-700">Production Model:</label>
+                            <select id="experiment-select" class="p-2 border border-gray-300 rounded-lg" onchange="updateCharts(this.value)">
+                                <option value="exp2" selected>v2.2.0 (Current Production)</option>
+                                <option value="exp3">v2.3.0 (Shadow Candidate)</option>
+                            </select>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">The AI uses this comparison to judge if the **Shadow Candidate** is skillful enough to be promoted. Requires live, time-series BSS data for all versions.</p>
+                        <div class="chart-container" style="height:300px;">
+                            <canvas id="pollutantRemovalChart"></canvas>
+                        </div>
+                        <button onclick="exportPredictionReport('csv')" class="mt-4 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition duration-300">
+                            Export Model Score Log (CSV)
+                        </button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="font-bold text-xl mb-4 text-[#3D405B]">Anomaly Rate vs. Ground Truth - Learning Discrepancy</h3>
+                         <p class="text-sm text-gray-500 mb-4">This chart plots the model's alerts against confirmed real-world events. High discrepancy generates a negative training signal.</p>
+                        <div class="chart-container" style="height:300px;">
+                            <canvas id="complianceEventsChart"></canvas>
+                        </div>
+                        <button onclick="exportPredictionReport('json')" class="mt-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-300">
+                            Export Anomaly/Error Log (JSON)
+                        </button>
+                    </div>
+                    <div class="col-span-1 md:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="font-bold text-xl mb-4 text-center text-[#3D405B]">Cost Savings Breakdown - Value Metric</h3>
+                        <p class="text-sm text-gray-500 mb-4 max-w-2xl mx-auto text-center">Quantifying business value from the model's efficient maintenance. This metric acts as a secondary **optimization target** for the AI during the CT cycle.</p>
+                        <div class="chart-container" style="max-width: 400px; height: 300px;">
+                            <canvas id="costSavingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- ORCHESTRATION & FEATURE LINEAGE (Refactored Workflow) - AI Training Focus -->
+        <div id="workflow" class="main-section">
+            <section class="py-16 bg-white rounded-xl shadow-lg">
+                <div class="text-center mb-12 px-4">
+                    <h2 class="text-4xl font-bold text-[#3D405B]">Orchestration & Feature Lineage Audit</h2>
+                    <p class="mt-2 text-lg text-gray-600">This log is the **action-feedback dataset** for training, recording every system decision and the final outcome (which is used as the training label).</p>
+                </div>
+
+                <!-- COMM_HUB and Pipeline Status (State Management) -->
+                <div class="grid md:grid-cols-3 gap-8 mb-8 max-w-6xl mx-auto px-4">
+                    <div class="bg-gray-100 p-4 rounded-xl shadow-inner col-span-1 border-l-4 border-[#81C3D7]">
+                        <h3 class="font-bold text-lg mb-1 text-[#3D405B]">Comms Hub Message Queue</h3>
+                        <p class="text-3xl font-extrabold text-[#81C3D7]" id="comm-hub-count">---</p>
+                        <p class="text-sm text-gray-600">Pending Execution Messages (Priority Queue)</p>
+                    </div>
+                    <div id="pipeline-status-board" class="bg-gray-100 p-4 rounded-xl shadow-inner col-span-2 flex flex-col justify-center border-l-4 border-red-400">
+                        <div class="text-lg font-bold text-[#3D405B] mb-2">Continuous Training (CT) Status (Model Registry)</div>
+                        <div class="flex justify-between items-center">
+                            <span id="pipeline-status" class="ml-2 text-gray-600 font-bold">Deployed Model: v2.2.0 (Awaiting status...)</span>
+                            <button id="trigger-promotion" onclick="promoteShadowModel()" class="px-4 py-2 bg-purple-600 text-white font-bold text-sm rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
+                                Promote Shadow Model (v2.3.0)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Autonomous Action Flow Visualization (Execution Status) -->
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8 mb-12 max-w-6xl mx-auto px-4">
+                    
+                    <!-- SCRIPT_GEN -->
+                    <div id="script-gen-card" class="flow-card bg-gray-50 p-6 rounded-xl border border-gray-300 w-full md:w-1/3 shadow-md">
+                        <h4 class="font-bold text-2xl text-[#3D405B]">Script Generation Engine</h4>
+                        <p class="text-sm text-gray-600 mb-3">Autonomous Script Generation</p>
+                        <div class="mt-4">
+                            <p class="font-semibold text-gray-700">Status:</p>
+                            <p id="script-gen-status" class="text-lg text-gray-500 font-bold">---</p>
+                            <p id="script-gen-last" class="text-xs text-gray-500 mt-1">Last Script: ---</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-arrow hidden md:block">&rarr;</div>
+                    <div class="flow-arrow md:hidden">&darr;</div>
+
+                    <!-- EXEC_ENGINE -->
+                    <div id="exec-engine-card" class="flow-card bg-gray-50 p-6 rounded-xl border border-gray-300 w-full md:w-1/3 shadow-md">
+                        <h4 class="font-bold text-2xl text-[#3D405B]">Execution Engine</h4>
+                        <p class="text-sm text-gray-600 mb-3">Script Execution & Management</p>
+                        <div class="mt-4">
+                            <p class="font-semibold text-gray-700">Status:</p>
+                            <p id="exec-engine-status" class="text-lg text-gray-500 font-bold">---</p>
+                            <p id="exec-engine-last" class="text-xs text-gray-500 mt-1">Last Exec: ---</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Autonomous Script Log (Audit Trail) -->
+                <div class="bg-white p-8 rounded-xl shadow-lg mb-12 max-w-6xl mx-auto">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Execution Trace Log (AI Training Dataset)</h3>
+                    <p class="text-gray-500 mb-4 text-sm">Every entry here is a labeled **action-outcome pair**. This is the key dataset the AI uses to learn the relationship between its predictions and the physical results. Model version tagging ensures **reproducibility**.</p>
+                    <div class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Timestamp (UTC)</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Model Ver.</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Script/Message ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Description</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status (Outcome)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="execution-log-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Log entries are inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- IMPORT NEW DATA SECTION (CI Start) -->
+                 <div class="bg-gray-50 p-6 rounded-xl mb-12 border border-gray-200 max-w-4xl mx-auto">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Continuous Integration (CI): Import New Ground Truth</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Use this to manually push new, verified ground truth data (e.g., lab results) into the Feature Store. This is a crucial source of **training labels** for the AI.</p>
+                    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                        <p class="text-gray-500 font-medium">Click to select files (CSV/JSON) or drop here</p>
+                        <p id="file-status" class="text-sm text-gray-500 mt-1">Awaiting file input for validation...</p>
+                    </div>
+                    <input type="file" id="file-input" class="hidden" accept=".csv, .json" onchange="simulateImport(this.files)">
+                </div>
+            </section>
+        </div>
+
+        <!-- FEATURE STORE & GROUND TRUTH INTEGRITY (Refactored Data Sources) - AI Training Focus -->
+        <div id="data-sources" class="main-section">
+            <section class="py-16">
+                 <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3D405B]">Feature Store & Ground Truth Integrity</h2>
+                    <p class="mt-2 text-lg text-gray-600">The core intelligence requires high-integrity data. This section provides the AI with diagnostic views of **feature health, data drift, and ground truth source quality**.</p>
+                </div>
+                
+                <!-- AI Engine & Risk Analysis Stack (Consumers/Generators) -->
+                <div class="grid md:grid-cols-2 gap-8 mb-12">
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#81C3D7]">
+                        <h3 class="font-bold text-2xl mb-2 text-[#3D405B]">AI Engine (Cognitive Layer) - Feature Consumer</h3>
+                        <p class="text-gray-600 text-sm mb-3">Responsible for synthesizing research and generating natural language predictions, acting as the primary consumer of high-fidelity features.</p>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>Natural Language Storm Predictions</li>
+                            <li>Document Analysis (PDF/DOCX/KMZ)</li>
+                            <li>Research Synthesis Engine</li>
+                            <li>Audio Transcription with Whisper</li>
+                        </ul>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#F6AE2D]">
+                        <h3 class="font-bold text-2xl mb-2 text-[#3D405B]">Risk Analysis (Decision Engine) - Label Generator</h3>
+                        <p class="text-gray-600 text-sm mb-3">Translates raw model output into actionable, site-specific decisions, generating **internal training labels** for vulnerability assessment.</p>
+                        <ul class="text-sm text-gray-700 space-y-1">
+                            <li>AI-powered Vulnerability Assessment</li>
+                            <li>Multi-AI Consensus (GPT/Claude/Gemini)</li>
+                            <li>Infrastructure Impact Analysis</li>
+                            <li>BMP Recommendations</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                 <!-- Custom Feature API Hook (Agile Ingestion Test) -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-lg mb-12 border-t-4 border-[#F2CC8F]">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Custom Feature API Hook (Agile Ingestion Test)</h3>
+                    <p class="text-gray-500 mb-6">Configure a **real external API endpoint** to test the quality of a new feature vector. The system logs the exact configuration (including your key and query) as an auditable event in the **Execution Trace Log**.</p>
+
+                    <div class="grid md:grid-cols-3 gap-4 mb-4">
+                        <input type="text" id="custom-api-name" placeholder="API Source Name (e.g., Local Sensor Array)" class="p-3 border border-gray-300 rounded-lg col-span-3 md:col-span-1">
+                        <input type="url" id="custom-api-endpoint" value="https://api.example.com/data/v1" placeholder="External API Endpoint URL" class="p-3 border border-gray-300 rounded-lg col-span-3 md:col-span-1">
+                        <input type="password" id="custom-api-key" value="YOUR_REAL_API_KEY" placeholder="API Key/Token (Logged for Audit)" class="p-3 border border-gray-300 rounded-lg col-span-3 md:col-span-1">
+                    </div>
+
+                    <div class="mb-4">
+                        <textarea id="custom-api-query" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#81C3D7]" placeholder="Enter API Query/Payload (e.g., JSON body or URL parameters like: site_id=45&pollutant=copper&start_date=2025-01-01)"></textarea>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
+                         <select id="custom-api-target-slot" class="p-3 border border-gray-300 rounded-lg w-full md:w-1/3">
+                            <option value="1">Target Slot 1 (NOAA Placeholder)</option>
+                            <option value="2">Target Slot 2 (USGS Placeholder)</option>
+                            <option value="3" selected>Target Slot 3 (Compliance Placeholder)</option>
+                        </select>
+                        <button onclick="callCustomApi()" class="px-6 py-3 bg-[#E07A5F] text-white font-bold rounded-lg shadow-md hover:bg-[#B75841] transition duration-300 w-full md:w-1/3">
+                            Execute & Monitor API Call
+                        </button>
+                        <p id="custom-api-status" class="text-sm text-gray-600 font-medium w-full md:w-1/3 text-center md:text-left">Ready to execute real-time feature ingestion test.</p>
+                    </div>
+                </div>
+
+
+                <!-- Real-time API Ingestion Status (Diagnostics) -->
+                <div class="bg-white p-8 rounded-xl shadow-lg mb-12 border-t-4 border-[#81C3D7]">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Real-time API Ingestion Status (Diagnostic View)</h3>
+                    <p class="text-gray-500 mb-6">Displays the last monitored status of the core production Feature APIs. **Results update only when a manual test is triggered.**</p>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
+                            <p class="text-sm font-medium text-gray-600 mb-2" id="api-name-1">NOAA Weather API</p>
+                            <p class="text-3xl font-extrabold text-gray-500 latency-text" id="api-latency-1">---</p>
+                            <p class="text-xs text-gray-500">Latency</p>
+                            <p class="text-sm font-semibold" id="api-quality-1">Quality: ---</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
+                            <p class="text-sm font-medium text-gray-600 mb-2" id="api-name-2">USGS Water Flow API</p>
+                            <p class="text-3xl font-extrabold text-gray-500 latency-text" id="api-latency-2">---</p>
+                            <p class="text-xs text-gray-500">Latency</p>
+                            <p class="text-sm font-semibold" id="api-quality-2">Quality: ---</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
+                            <p class="text-sm font-medium text-gray-600 mb-2" id="api-name-3">Compliance Status API</p>
+                            <p class="text-3xl font-extrabold text-gray-500 latency-text" id="api-latency-3">---</p>
+                            <p class="text-xs text-gray-500">Latency</p>
+                            <p class="text-sm font-semibold" id="api-quality-3">Quality: ---</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automated Data Validation (ADeV) Status (Quality Gate) -->
+                <div class="bg-white p-8 rounded-xl shadow-lg mb-12 border-t-4 border-red-500">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">ADeV Core (Automated Data Validation)</h3>
+                    <p class="text-gray-500 mb-6">The AI uses these metrics to determine data integrity before feature creation. A low score halts the Continuous Training (CT) cycle, preventing model corruption.</p>
+                    <div class="grid md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-xl font-extrabold text-gray-500" id="adev-completeness">---</p>
+                            <p class="text-sm font-medium text-gray-600">Completeness Score</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-xl font-extrabold text-gray-500" id="adev-schema">---</p>
+                            <p class="text-sm font-medium text-gray-600">Schema Conformance</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-xl font-extrabold text-gray-500" id="adev-drift">---</p>
+                            <p class="text-sm font-medium text-gray-600">Feature Distribution Drift</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-xl font-extrabold text-gray-500" id="adev-duplicates">---</p>
+                            <p class="text-sm font-medium text-gray-600">Duplicate Records Found</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Global Prediction Engines - Detail Table (Feature Source Metadata) -->
+                <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Category A: Real-Time Feature Ingestion (Data Health)</h3>
+                    <p class="text-gray-500 mb-6">The AI uses **Latency** and **Completeness** scores here to gauge the reliability of its features. Poor health scores alert the model to rely more on historic training data and less on current feature ingestion.</p>
+                    <div class="flex justify-between items-center mb-4">
+                         <h4 class="font-medium text-lg text-gray-700">Feature Health Status Overview</h4>
+                         <input type="text" id="model-filter-input" placeholder="Filter by source or status..." class="p-2 border border-gray-300 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-[#81C3D7]">
+                    </div>
+                    <div id="model-data-container" class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th data-column="name" class="table-header px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Feature Source (Type)</th>
+                                    <th data-column="org" class="table-header px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Health Status</th>
+                                    <th data-column="res" class="table-header px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Last Latency Check</th>
+                                    <th data-column="range" class="table-header px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Prediction Range</th>
+                                    <th data-column="philosophy" class="table-header px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Completeness Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="model-data-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Regional Data Portals (Ground Truth Source Metadata) -->
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="font-semibold text-2xl mb-4 text-[#3D405B]">Category B: Regulatory Ground Truth (DMRs, Audits) - Label Source</h3>
+                    <p class="text-gray-500 mb-6">These sources provide the **y-variable (correct label)** for supervised learning, marking historical predictions as either successful or erroneous.</p>
+                    <div class="flex justify-between items-center mb-4">
+                         <h4 class="font-medium text-lg text-gray-700">Ground Truth Feeds Status</h4>
+                         <input type="text" id="regional-filter-input" placeholder="Filter ground truth sources..." class="p-2 border border-gray-300 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-[#81C3D7]">
+                    </div>
+                    <div id="regional-data-container" class="overflow-x-auto shadow-md rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th data-column="source" class="table-header px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Domain (Ground Truth Source)</th>
+                                    <th data-column="region" class="table-header px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Region / Country</th>
+                                    <th data-column="status" class="table-header px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role in MLOps</th>
+                                </tr>
+                            </thead>
+                            <tbody id="regional-data-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- GOVERNANCE & HUMAN FEEDBACK LOOP (Refactored Expertise) - AI Training Focus -->
+        <div id="expertise" class="main-section">
+            <section class="py-16">
+                 <div class="text-center max-w-4xl mx-auto">
+                    <h2 class="text-4xl font-bold text-[#3D405B]">Governance & Human Feedback Loop (Corrective Signal)</h2>
+                    <div class="w-24 h-1 bg-[#81C3D7] mx-auto my-6"></div>
+                    <p class="text-xl text-gray-600 leading-relaxed">
+                        Your two decades of regulatory expertise is the **Corrective Signal**. The **Human-in-the-Loop** audit provides the final, high-value, labeled data point that overrides algorithmic errors, serving as critical training data.
+                    </p>
+                 </div>
+                 
+                 <div class="mt-12 grid md:grid-cols-2 gap-8">
+                     <!-- SECURITY Module (Constraints) -->
+                      <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#3D405B]">
+                         <h3 class="text-xl font-bold mb-3 text-[#3D405B]">Security Module (Training Constraints)</h3>
+                         <p class="text-gray-600 text-sm mb-4">These frameworks define the **legal and ethical boundaries** of the model's decision space, preventing non-compliant or non-auditable actions.</p>
+                         <ul class="text-sm text-gray-700 space-y-1">
+                            <li>Digital Signature Verification (SHA-256)</li>
+                            <li>Audit Logging & Compliance Traceability</li>
+                            <li>SOC 2, ISO 27001, NIST Frameworks</li>
+                            <li>GDPR, CCPA, HIPAA, FERPA Compliant</li>
+                        </ul>
+                     </div>
+
+                     <!-- ALERT_SYSTEM Module (Dispatch & Memory) -->
+                      <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-[#81C3D7]">
+                         <h3 class="text-xl font-bold mb-3 text-[#3D405B]">Alert System (Auditable Dispatch & Memory)</h3>
+                         <p class="text-gray-600 text-sm mb-4">Ensures high-assurance alerts and uses a memory system to track historical human-AI emotional interactions, refining future communication.</p>
+                         <ul class="text-sm text-gray-700 space-y-1">
+                            <li>AI-powered Emotion Memory System</li>
+                            <li>Multi-AI Consensus Emotion Scoring</li>
+                            <li>SHA-256 Alert Signatures & Lineage</li>
+                            <li>WebSocket Alert Dispatch</li>
+                        </ul>
+                     </div>
+                 </div>
+
+                 <!-- Human-in-the-Loop Audit (Correction) -->
+                 <div class="mt-12">
+                     <h3 class="font-bold text-3xl mb-6 text-[#3D405B]">Human-in-the-Loop Validation (Injecting Expertise)</h3>
+                     <p class="mb-8 text-gray-600">Simulate the process of providing the AI with a **corrective data label** (Confirm or Override) and the expert justification, which is immediately pushed to the training dataset.</p>
+                     
+                     <div id="audit-card" class="bg-white p-8 rounded-xl shadow-2xl border-l-8 border-[#E07A5F] max-w-4xl mx-auto">
+                        <h4 class="text-2xl font-bold text-[#E07A5F] mb-4">Prediction Flag: Critical High-Risk Event (ID: #4829A)</h4>
+                        <div class="grid md:grid-cols-2 gap-4 text-gray-700">
+                            <div>
+                                <p><span class="font-semibold">Model Version Used:</span> <span id="audit-model-ver">v2.2.0</span></p>
+                                <p><span class="font-semibold">Predicted Pollutant:</span> Copper</p>
+                                <p><span class="font-semibold">Predicted Risk Score:</span> 0.95 (Severe)</p>
+                                <p><span class="font-semibold">Feature Input Status:</span> GFS, ECMWF (Healthy)</p>
+                            </div>
+                            <div>
+                                <p><span class="font-semibold">Recommended Action:</span> Initiate Emergency Recirculation Loop and increase Chemical Dosing Rate by 15% immediately.</p>
+                                <p><span class="font-semibold">Required Justification (XAI):</span> High antecedent moisture + 99th percentile 3-hour precipitation forecast.</p>
+                                <p><span class="font-semibold">Ground Truth Lag:</span> **3 Days** (Awaiting Lab Results)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <h5 class="font-bold text-lg mb-2">Expert Validation:</h5>
+                            <textarea id="expert-notes" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#81C3D7]" placeholder="Enter expert commentary here: Justify the action or override the prediction based on physical system knowledge or historical DMR data..."></textarea>
+                            <div class="flex justify-end space-x-4 mt-3">
+                                <button onclick="simulateAudit('Override')" class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition duration-300">
+                                    Override Prediction
+                                </button>
+                                <button onclick="simulateAudit('Confirm')" class="px-6 py-2 bg-[#81C3D7] text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-300">
+                                    Confirm Action & Log Audit (Export)
+                                </button>
+                            </div>
+                        </div>
+                        <p id="audit-result" class="mt-4 text-center font-bold hidden"></p>
+                     </div>
+                 </div>
+            </section>
+        </div>
+
+    </main>
+    
+    <footer class="bg-white border-t mt-16">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-600">
+            <p>&copy; 2025 Stormwater Intelligence AI Training & Audit Core by Daniel Guzman. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // GLOBAL STATE DEFINITIONS: Moved here to ensure they are defined before any function call in the script uses them.
+        let currentDeployedModel = 'exp2';
+        let deployedModelVersion = 'v2.2.0';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- DATASETS FOR TABLES (Metadata is static, metrics must be dynamic) ---
+
+            // Category A: Global NWP and AI Prediction Models (Features)
+            const globalModelData = [
+                { type: 'Traditional', name: 'Global Forecast System (GFS)', org: 'NCEP (NOAA)', res: '28 km base / 127 layers', range: '16 days', philosophy: 'Public utility; couples 4 models (atmosphere, ocean, land, sea ice).', url: 'https://www.weather.gov/gfs/', health: 'Good', latency: '4 hr cycle', complete: '99.9%' },
+                { type: 'Traditional', name: 'ECMWF IFS (IFS)', org: 'ECMWF (34 nations)', res: '9 km unified / 91 layers', range: '15 days', philosophy: 'Maximum computational investment for highest accuracy.', url: 'https://www.ecmwf.int/en/forecasts/charts/catalogue', health: 'Critical', latency: '6 hr cycle', complete: '85.2%' },
+                { type: 'Traditional', name: 'UK Met Office Unified Model (UM)', org: 'UK Met Office', res: 'Seamless modelling', range: 'N/A', philosophy: 'Same model family for weather to climate (consistent across scales).', url: 'https://www.metoffice.gov.uk/weather/guides/improve-your-knowledge/weather-models', health: 'Good', latency: '12 hr cycle', complete: '98.0%' },
+                { type: 'Real-Time', name: 'Real-time NOAA Sensors (25)', org: 'NOAA', res: 'Live Stream', range: 'Current', philosophy: 'Direct operational input to feature store for immediate prediction.', url: 'https://www.noaa.gov/', health: 'Good', latency: '3 sec cycle', complete: '92.0%' },
+                { type: 'Real-Time', name: 'USGS Terrain/Watershed', org: 'USGS', res: 'Static', range: 'N/A', philosophy: 'Static geographical features for physical model grounding.', url: 'https://www.usgs.gov/', health: 'Good', latency: 'N/A', complete: '100.0%' },
+                { type: 'Real-Time', name: 'NASA Satellite Data', org: 'NASA', res: 'Imagery/LIDAR', range: 'Near Real-Time', philosophy: 'Remote sensing data integration (e.g., soil moisture).', url: 'https://www.nasa.gov/', health: 'Fair', latency: '4 hr cycle', complete: '89.0%' },
+                { type: 'AI', name: 'Pangu-Weather', org: 'Huawei Cloud', res: '10,000x faster', range: '10 days', philosophy: '3D Neural Network. Can rival conventional methods.', url: 'https://www.huaweicloud.com/en/intl/pangu-weather.html', health: 'Good', latency: '1 hr cycle', complete: '99.0%' }
+            ];
+
+            // Category B: Regional Open Data Portals (Ground Truth)
+            const regionalAgencyData = [
+                { source: "data.gov.uk", region: "United Kingdom", status: "Regulatory Ground Truth" },
+                { source: "data.gov.ua", region: "Ukraine", status: "Pending Integration" },
+                { source: "www.data.gov.tn", region: "Tunisia", status: "Feature Augmentation" },
+                { source: "data.gov.tt", region: "Trinidad & Tobago", status: "Regulatory Ground Truth" },
+                { source: "www.dataportal.se", region: "Sweden", status: "Regulatory Ground Truth" },
+                { source: "data.gov.sg", region: "Singapore", status: "Regulatory Ground Truth" },
+                { source: "data.gov.ro", region: "Romania", status: "Pending Integration" },
+                { source: "data.gov.ph", region: "Philippines", status: "Regulatory Ground Truth" },
+                { source: "www.data.govt.nz", region: "New Zealand", status: "Regulatory Ground Truth" },
+                { source: "data.gov.ma", region: "Morocco", status: "Feature Augmentation" },
+                { source: "data.gov.ie", region: "Ireland", status: "Regulatory Ground Truth" },
+                { source: "data.gov.in", region: "India", status: "Regulatory Ground Truth" },
+                { source: "data.gov.hk", region: "Hong Kong", status: "Regulatory Ground Truth" },
+                { source: "repository.data.gov.gr", region: "Greece", status: "Feature Augmentation" },
+                { source: "data.gov.au", region: "Australia", status: "Regulatory Ground Truth" },
+                { source: "open.manchester.gov.uk", region: "UK (Manchester)", status: "Drift Monitoring" },
+                { source: "datalab.alkmaar.nl", region: "Netherlands (Alkmaar)", status: "Drift Monitoring" },
+                { source: "apps.warwickshire.gov.uk", region: "UK (Warwickshire)", status: "Drift Monitoring" },
+                { source: "www.sutton.gov.uk", region: "UK (Sutton)", status: "Drift Monitoring" },
+                { source: "data.redbridge.gov.uk", region: "UK (Redbridge)", status: "Drift Monitoring" }
+            ];
+            
+            // --- Helper Functions ---
+            function getHealthDotColor(health) {
+                switch (health) {
+                    case 'Good': return 'bg-green-500';
+                    case 'Fair': return 'bg-yellow-500';
+                    case 'Critical': return 'bg-red-500';
+                    default: return 'bg-gray-400';
+                }
+            }
+            
+            // --- TABLE RENDERING AND INTERACTION LOGIC (Tab 3) ---
+            
+            let regionalSortColumn = 'source';
+            let regionalSortDirection = 'asc';
+            let modelSortColumn = 'name';
+            let modelSortDirection = 'asc';
+
+            function getStatusColor(status) {
+                if (status.includes('Ground Truth')) return 'bg-green-100 text-green-800';
+                if (status.includes('Drift')) return 'bg-yellow-100 text-yellow-800';
+                if (status.includes('Pending')) return 'bg-red-100 text-red-800';
+                return 'bg-blue-100 text-blue-800';
+            }
+            
+            // --- Category A: Global Model Table Logic (Features) ---
+            function renderModelTable(data) {
+                const tbody = document.getElementById('model-data-table-body');
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr class="bg-gray-50"><td colspan="5" class="px-4 py-3 text-center text-sm font-medium text-gray-400">No matching model data found.</td></tr>`;
+                    return;
+                }
+                data.forEach(item => {
+                    const typeColor = item.type === 'AI' ? 'bg-indigo-100 text-indigo-800' : item.type === 'Real-Time' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+                    const healthDot = getHealthDotColor(item.health);
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                            <a href="${item.url}" target="_blank" class="data-link">
+                                ${item.name} 
+                            </a>
+                            <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${typeColor}">${item.type}</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">
+                            <span class="status-dot ${healthDot}"></span> ${item.health}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">${item.latency}</td>
+                        <td class="px-4 py-3 text-sm text-gray-500">${item.range}</td>
+                        <td class="px-4 py-3 text-sm text-gray-500">${item.complete}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            function filterAndSortModelTable() {
+                const filterValue = document.getElementById('model-filter-input').value.toLowerCase();
+                
+                let filteredData = globalModelData.filter(item => 
+                    item.name.toLowerCase().includes(filterValue) ||
+                    item.org.toLowerCase().includes(filterValue) ||
+                    item.philosophy.toLowerCase().includes(filterValue) ||
+                    item.type.toLowerCase().includes(filterValue) ||
+                    item.health.toLowerCase().includes(filterValue)
+                );
+                
+                filteredData.sort((a, b) => {
+                    const aValue = a[modelSortColumn];
+                    const bValue = b[modelSortColumn];
+                    if (aValue < bValue) return modelSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return modelSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                
+                renderModelTable(filteredData);
+            }
+            
+            
+            // --- Category B: Regional Table Logic (Ground Truth) ---
+            function renderRegionalTable(data) {
+                const tbody = document.getElementById('regional-data-table-body');
+                tbody.innerHTML = '';
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr class="bg-gray-50"><td colspan="3" class="px-6 py-4 text-center text-sm font-medium text-gray-400">No matching regional data sources found.</td></tr>`;
+                    return;
+                }
+                data.forEach(item => {
+                    // Prepend https:// to ensure valid URL, assuming all are web addresses
+                    const url = item.source.startsWith('http') ? item.source : `https://${item.source}`;
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <a href="${url}" target="_blank" class="data-link">${item.source}</a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.region}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(item.status)}">
+                                ${item.status}
+                            </span>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            function filterAndSortRegionalTable() {
+                const filterValue = document.getElementById('regional-filter-input').value.toLowerCase();
+                
+                let filteredData = regionalAgencyData.filter(item => 
+                    item.source.toLowerCase().includes(filterValue) ||
+                    item.region.toLowerCase().includes(filterValue) ||
+                    item.status.toLowerCase().includes(filterValue)
+                );
+                
+                filteredData.sort((a, b) => {
+                    const aValue = a[regionalSortColumn];
+                    const bValue = b[regionalSortColumn];
+                    if (aValue < bValue) return modelSortDirection === 'asc' ? -1 : 1;
+                    if (aValue > bValue) return modelSortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                
+                renderRegionalTable(filteredData);
+            }
+            
+            
+            // --- CHART DATA & INITIALIZATION (Dashboard - Empty for Real Data) ---
+            const initialChartData = {
+                labels: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'],
+                datasets: [
+                    { label: 'Production Model Skill (v2.2.0)', data: [0.85, 0.82, 0.79, 0.76], borderColor: '#3D405B', fill: false, tension: 0.2, borderWidth: 3 },
+                    { label: 'Baseline Model Skill (v1.0.0)', data: [0.80, 0.78, 0.76, 0.74], borderColor: '#81C3D7', fill: false, tension: 0.2, borderDash: [5, 5], borderWidth: 2 },
+                    { label: 'Shadow Model Skill (v2.3.0)', data: [0.81, 0.83, 0.85, 0.87], borderColor: '#F6AE2D', fill: false, tension: 0.2, borderWidth: 3, pointRadius: 4 },
+                    { label: 'Retraining Threshold (0.75)', data: [0.75, 0.75, 0.75, 0.75], borderColor: '#E07A5F', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false }
+                ]
+            };
+
+            const initialEventsData = {
+                labels: ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'],
+                datasets: [
+                    { label: 'Actual Non-Compliance Events (Ground Truth)', data: [12, 18, 25, 15], backgroundColor: '#E07A5F' },
+                    { label: 'Model Anomaly Detections (Proactive Alerts)', data: [15, 20, 23, 17], backgroundColor: '#81C3D7' }
+                ]
+            };
+            
+            const initialCostData = {
+                labels: ['Chemicals', 'Labor', 'Maintenance'],
+                datasets: [{ label: 'Cost Savings Breakdown', data: [35, 45, 20], backgroundColor: ['#3D405B', '#81C3D7', '#F2CC8F'], hoverOffset: 4 }]
+            };
+
+            let pollutantChart, eventsChart, costChart;
+            
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(2);
+                                    if(context.chart.id === 'costSavingsChart'){ label = label.substring(0, label.length - 3); label += '%'; }
+                                    if(context.chart.id === 'pollutantRemovalChart'){ label += ' Skill Score'; }
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#6b7280' } },
+                    x: { ticks: { color: '#6b7280' } }
+                }
+            };
+
+            function createPollutantChart() {
+                const ctx = document.getElementById('pollutantRemovalChart').getContext('2d');
+                if(pollutantChart) pollutantChart.destroy();
+                pollutantChart = new Chart(ctx, {
+                    type: 'line',
+                    data: initialChartData,
+                    options: { 
+                        ...commonChartOptions, 
+                        scales: { 
+                            ...commonChartOptions.scales, 
+                            y: { 
+                                ...commonChartOptions.scales.y, 
+                                max: 1.0, 
+                                min: 0.6, 
+                                title: { display: true, text: 'Model Skill Score (BSS)' } 
+                            } 
+                        },
+                        plugins: {
+                            ...commonChartOptions.plugins,
+                            title: { display: true, text: 'Simulated Live BSS Data' }
+                        }
+                    }
+                });
+            }
+
+            function createEventsChart() {
+                const ctx = document.getElementById('complianceEventsChart').getContext('2d');
+                if(eventsChart) eventsChart.destroy();
+                eventsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: initialEventsData,
+                    options: {
+                         ...commonChartOptions,
+                         plugins: {
+                             ...commonChartOptions.plugins,
+                             title: { display: true, text: 'Simulated Live Event Trace Data' }
+                         }
+                    }
+                });
+            }
+            
+            function createCostChart() {
+                 const ctx = document.getElementById('costSavingsChart').getContext('2d');
+                 if(costChart) costChart.destroy();
+                 costChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: initialCostData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                             legend: { position: 'bottom' },
+                             title: {
+                                display: true,
+                                text: `Total Savings: 7.5% YoY (Simulated)`,
+                                font: { size: 16 },
+                                color: '#3D405B',
+                                padding: { top: 10, bottom: 20 }
+                            },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed !== null && context.parsed.toFixed) { label += context.parsed.toFixed(2) + '%'; }
+                                        return label;
+                                    }
+                                }
+                            },
+                        }
+                    }
+                 });
+            }
+            
+            function updateCharts(exp) {
+                // Reasoning: This function updates the entire UI to reflect the selected model version (Production or Shadow)
+                const modelData = {
+                    'exp2': { version: 'v2.2.0', name: 'Current Production' },
+                    'exp3': { version: 'v2.3.0', name: 'Shadow Candidate' }
+                };
+
+                deployedModelVersion = modelData[exp].version;
+                document.getElementById('audit-model-ver').textContent = deployedModelVersion;
+                
+                // FIX: currentDeployedModel is now a global variable
+                document.getElementById('pipeline-status').textContent = `Deployed Model: ${modelData[currentDeployedModel].version} (${modelData[currentDeployedModel].name})`;
+                
+                // Update the Promote button based on the *currently deployed* model (exp2)
+                const promoteButton = document.getElementById('trigger-promotion');
+                if (currentDeployedModel === 'exp3') {
+                     promoteButton.textContent = 'Shadow Model Already Deployed';
+                     promoteButton.disabled = true;
+                     promoteButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                     promoteButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+                } else {
+                     promoteButton.textContent = `Promote Shadow Model (v2.3.0)`;
+                     promoteButton.disabled = false;
+                     promoteButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                     promoteButton.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                }
+                
+                // CRITICAL: In a real implementation, you would trigger a data fetch here
+            }
+            
+            
+            // --- Orchestration & Feature Lineage Logic (Tab 2) ---
+            const logBody = document.getElementById('execution-log-body');
+            const maxLogEntries = 6;
+            let scriptIdCounter = 1000;
+
+            function getCurrentTime() {
+                const now = new Date();
+                return now.toISOString().split('T')[1].substring(0, 8); // HH:MM:SS
+            }
+
+            window.addLogEntry = function(source, modelVer, id, description, status) {
+                // Reasoning: Core audit function. Logs all system events for AI training and compliance.
+                const time = getCurrentTime();
+                const newRow = logBody.insertRow(0); // Insert at the top
+                const statusColor = status.includes('SUCCESS') ? 'text-green-600' : status.includes('RUNNING') ? 'text-blue-600 log-running' : status.includes('ERROR') || status.includes('FAIL') || status.includes('OVERRIDE') ? 'text-red-600' : 'text-gray-500';
+
+                newRow.innerHTML = `
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${time}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">${modelVer}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">${id}</td>
+                    <td class="px-6 py-3 text-sm text-gray-500 max-w-xs truncate">${description}</td>
+                    <td class="px-6 py-3 whitespace-nowrap text-sm font-bold ${statusColor}">${status}</td>
+                `;
+
+                // Enforce max log entries
+                while (logBody.rows.length > maxLogEntries) {
+                    logBody.deleteRow(logBody.rows.length - 1);
+                }
+            }
+
+            window.promoteShadowModel = function() {
+                // Reasoning: Simulates deployment. Updates global state and logs the critical MLOps transition.
+                if (currentDeployedModel === 'exp3') return;
+
+                const shadowVersion = 'v2.3.0';
+                document.getElementById('pipeline-status').textContent = `Promoting ${shadowVersion} to Production...`;
+                document.getElementById('pipeline-status').classList.remove('text-green-600', 'text-gray-600');
+                document.getElementById('pipeline-status').classList.add('text-red-600');
+                addLogEntry('MODEL_OPS', deployedModelVersion, 'PROMO-001', 'Shadow Model promotion initiated based on BSS criteria.', 'INITIATED');
+                
+                // Mock Backend Confirmation
+                setTimeout(() => {
+                    currentDeployedModel = 'exp3';
+                    deployedModelVersion = shadowVersion;
+                    updateCharts('exp3'); // Update UI to reflect the new production model
+                    document.getElementById('pipeline-status').classList.remove('text-red-600');
+                    document.getElementById('pipeline-status').classList.add('text-green-600');
+                    addLogEntry('MODEL_OPS', shadowVersion, 'PROMO-001', `Model ${shadowVersion} successfully deployed to production environment.`, 'SUCCESS: New Production Model');
+                }, 3000); 
+            }
+            
+            // --- Model Governance Interaction (Human-in-the-Loop - Tab 4) ---
+            window.simulateAudit = function(action) {
+                // Reasoning: Generates the highest-value Corrective Signal data point for training.
+                const notes = document.getElementById('expert-notes').value.trim();
+                const resultDisplay = document.getElementById('audit-result');
+                const modelVer = deployedModelVersion;
+                const auditId = `AUDIT-${Date.now().toString().slice(-4)}`;
+
+                resultDisplay.classList.remove('hidden', 'text-green-600', 'text-red-600');
+
+                if (notes.length < 10) {
+                    resultDisplay.textContent = "Error: Please provide at least 10 characters of justification for the audit log.";
+                    resultDisplay.classList.add('text-red-600');
+                    return;
+                }
+                
+                // Log the action and justification as a specific training label
+                if (action === 'Confirm') {
+                    resultDisplay.textContent = `Audit Confirmed: Corrective Signal logged and EXPORTED to training dataset.`;
+                    resultDisplay.classList.add('text-green-600');
+                    addLogEntry('HUMAN_IN_LOOP', modelVer, auditId, `Confirmed prediction #4829A: ${notes}`, 'CORRECTIVE SIGNAL: CONFIRM');
+                } else if (action === 'Override') {
+                    resultDisplay.textContent = `Audit Override: Corrective Signal logged. Rationale used for next Model Training cycle.`;
+                    resultDisplay.classList.add('text-red-600');
+                    addLogEntry('HUMAN_IN_LOOP', modelVer, auditId, `Overrode prediction #4829A: ${notes}`, 'CORRECTIVE SIGNAL: OVERRIDE');
+                }
+                document.getElementById('expert-notes').value = ''; 
+                resultDisplay.classList.remove('hidden');
+            }
+            
+            // --- IMPORT/EXPORT LOGIC (Real file generation/download - Tab 1 & 2) ---
+            
+            function downloadFile(content, fileName, contentType) {
+                // Reasoning: Generic function for client-side file download.
+                const a = document.createElement("a");
+                const file = new Blob([content], { type: contentType });
+                a.href = URL.createObjectURL(file);
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }
+
+            window.exportPredictionReport = function(format) {
+                // Reasoning: Exports metric logs (CSV) or anomaly details (JSON) for external audit.
+                const modelVer = deployedModelVersion;
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const fileName = `MLOps_Report_${modelVer}_${timestamp}.${format}`;
+                let content, contentType, logMessage;
+
+                if (format === 'csv') {
+                    content = "Date,Model_Version,BSS_Score,Feature_Drift_Rate,Action_Outcome\n";
+                    content += `2025-10-01,${modelVer},0.88,0.03,SUCCESS\n`;
+                    content += `2025-10-02,${modelVer},0.85,0.04,SUCCESS\n`;
+                    content += `2025-10-03,${modelVer},0.79,0.06,FAILURE\n`;
+                    contentType = 'text/csv';
+                    logMessage = `Exported Comprehensive Model Score Log (CSV) as ${fileName}`;
+                } else if (format === 'json') {
+                    content = JSON.stringify({
+                        report_id: `ANOMALY-AUDIT-${timestamp}`,
+                        model_version: modelVer,
+                        event_count: 3,
+                        events: [
+                            { id: "EVT-001", prediction: "Copper Spike", ground_truth: "FALSE", discrepancy: "HIGH", audit_status: "OVERRIDE" },
+                            { id: "EVT-002", prediction: "Zinc Alert", ground_truth: "TRUE", discrepancy: "LOW", audit_status: "CONFIRM" },
+                            { id: "EVT-003", prediction: "pH Drop", ground_truth: "PENDING", discrepancy: "MEDIUM", audit_status: "PENDING" }
+                        ]
+                    }, null, 2);
+                    contentType = 'application/json';
+                    logMessage = `Exported Detailed Anomaly/Error Log (JSON) as ${fileName}`;
+                }
+
+                if (content) {
+                    downloadFile(content, fileName, contentType);
+                    addLogEntry('REPORT_GEN', modelVer, 'EXP-RPT-001', logMessage, 'SUCCESS');
+                }
+            }
+            
+            window.simulateImport = function(files) {
+                // Reasoning: Simulates new Ground Truth data being pushed to the Feature Store for Continuous Integration (CI).
+                const fileStatus = document.getElementById('file-status');
+                if (files.length === 0) {
+                    fileStatus.textContent = "No file selected.";
+                    fileStatus.classList.remove('text-green-600', 'text-yellow-600');
+                    fileStatus.classList.add('text-red-600');
+                    return;
+                }
+                
+                const file = files[0];
+                fileStatus.textContent = `Processing file: ${file.name} (${(file.size / 1024).toFixed(2)} KB)...`;
+                fileStatus.classList.remove('text-red-600', 'text-green-600');
+                fileStatus.classList.add('text-yellow-600');
+
+                // Mock Backend Confirmation
+                setTimeout(() => {
+                    fileStatus.textContent = `SUCCESS: ${file.name} validated, feature engineered, and pushed to Feature Store for CT.`;
+                    fileStatus.classList.remove('text-yellow-600');
+                    fileStatus.classList.add('text-green-600');
+                    addLogEntry('DATA_CI', deployedModelVersion, 'DMR-0002', `New Ground Truth file imported: ${file.name}`, 'SUCCESS: New Training Data');
+                    document.getElementById('file-input').value = ''; 
+                }, 1000);
+            }
+
+            // --- Custom API Hook Logic (Tab 3) ---
+            
+            function updateSingleApiCard(slotId, name, latencyText, qualityText, latencyColor, qualityColor) {
+                // Reasoning: Helper function to visually update the API diagnostic cards.
+                document.getElementById(`api-name-${slotId}`).textContent = name;
+                
+                const latencyElement = document.getElementById(`api-latency-${slotId}`);
+                latencyElement.textContent = latencyText;
+                latencyElement.className = `text-3xl font-extrabold ${latencyColor} latency-text`;
+                
+                const qualityElement = document.getElementById(`api-quality-${slotId}`);
+                qualityElement.textContent = qualityText;
+                qualityElement.className = `text-sm font-semibold ${qualityColor}`;
+            }
+
+            window.callCustomApi = function() {
+                // Reasoning: Logs API configuration/key/query for audit and simulates a real-time connection diagnostic with detailed failure modes.
+                const name = document.getElementById('custom-api-name').value.trim();
+                const endpoint = document.getElementById('custom-api-endpoint').value.trim();
+                const key = document.getElementById('custom-api-key').value.trim();
+                const query = document.getElementById('custom-api-query').value.trim();
+                const targetSlot = document.getElementById('custom-api-target-slot').value;
+                const statusDisplay = document.getElementById('custom-api-status');
+
+                if (name === '' || endpoint === '' || query === '') {
+                    statusDisplay.textContent = 'Error: Name, Endpoint, and Query/Payload are required.';
+                    statusDisplay.classList.add('text-red-600');
+                    return;
+                }
+                
+                // 1. Log the configuration (CRITICAL MLOPS STEP)
+                const apiId = `API-CUST-${Date.now().toString().slice(-4)}`;
+                const truncatedKey = key.length > 8 ? key.substring(0, 4) + '...' + key.substring(key.length - 4) : key;
+                const truncatedQuery = query.substring(0, 30) + (query.length > 30 ? '...' : '');
+                
+                addLogEntry('FEATURE_STORE', deployedModelVersion, apiId, `Configuring/Testing: ${name} (Query: ${truncatedQuery}). Key: ${truncatedKey}`, 'TESTING');
+                
+                // 2. Set UI to Loading State
+                statusDisplay.textContent = `Executing diagnostic call to ${name}...`;
+                statusDisplay.classList.remove('text-red-600', 'text-green-600');
+                statusDisplay.classList.add('text-yellow-600');
+                
+                updateSingleApiCard(targetSlot, name, '...', 'Quality: ...', 'text-yellow-600', 'text-yellow-600');
+
+                // 3. MOCK API RESPONSE (Simulated latency/quality check)
+                
+                setTimeout(() => {
+                    const failType = Math.random(); 
+
+                    if (failType < 0.8) { // 80% success rate simulated
+                         const latency = 100 + Math.floor(Math.random() * 200);
+                         const quality = 90 + Math.floor(Math.random() * 8);
+                         const latencyText = `${latency}ms`;
+                         
+                         updateSingleApiCard(targetSlot, name, latencyText, `Quality: ${quality.toFixed(1)}%`, 'text-green-600', 'text-green-600');
+                         
+                         addLogEntry('FEATURE_STORE', deployedModelVersion, apiId, `Test Complete. Latency: ${latencyText}, Quality: ${quality.toFixed(1)}%`, 'SUCCESS: Feature Ready');
+                         
+                         statusDisplay.textContent = `SUCCESS: Diagnostic complete for ${name}. Latency: ${latencyText}. Check log for trace.`;
+                         statusDisplay.classList.remove('text-yellow-600');
+                         statusDisplay.classList.add('text-green-600');
+
+                    } else if (failType < 0.9) { // 10% High Latency Failure
+                         const latency = 2500 + Math.floor(Math.random() * 1500);
+                         const quality = 90 + Math.floor(Math.random() * 5);
+                         const latencyText = `${(latency / 1000).toFixed(1)}s`;
+                         
+                         updateSingleApiCard(targetSlot, name, latencyText, `Quality: ${quality.toFixed(1)}%`, 'text-red-600', 'text-green-600');
+                         
+                         addLogEntry('FEATURE_STORE', deployedModelVersion, apiId, `Test Complete. Latency: ${latencyText}, Quality: ${quality.toFixed(1)}%`, 'ERROR: High Latency Fail');
+                         
+                         statusDisplay.textContent = `FAIL: Latency breach for ${name}. System response too slow. Check log.`;
+                         statusDisplay.classList.remove('text-yellow-600', 'text-green-600');
+                         statusDisplay.classList.add('text-red-600');
+                    } else { // 10% Low Quality Failure
+                         const latency = 150 + Math.floor(Math.random() * 50);
+                         const quality = 50 + Math.floor(Math.random() * 10);
+                         const latencyText = `${latency}ms`;
+                         
+                         updateSingleApiCard(targetSlot, name, latencyText, `Quality: ${quality.toFixed(1)}%`, 'text-green-600', 'text-red-600');
+                         
+                         addLogEntry('FEATURE_STORE', deployedModelVersion, apiId, `Test Complete. Latency: ${latencyText}, Quality: ${quality.toFixed(1)}%`, 'ERROR: Low Quality Fail');
+                         
+                         statusDisplay.textContent = `FAIL: Data Quality below 60% for ${name}. Schema or completeness error. Check log.`;
+                         statusDisplay.classList.remove('text-yellow-600', 'text-green-600');
+                         statusDisplay.classList.add('text-red-600');
+                    }
+
+                }, 2500); // Simulate API call time
+            }
+            
+            // --- Initialization and Event Bindings ---
+            
+            function initializeUI() {
+                // Initialize Charts (Simulated Data)
+                createPollutantChart();
+                createEventsChart();
+                createCostChart();
+                updateCharts('exp2'); // Set initial model versions
+
+                // Initialize all KPI fields to blank for live data streaming
+                document.getElementById('skill-score').textContent = '---';
+                document.getElementById('feature-drift').textContent = '---';
+                document.getElementById('data-quality-index').textContent = '---';
+                document.getElementById('prediction-bias').textContent = '---';
+                
+                document.getElementById('comm-hub-count').textContent = '---';
+                document.getElementById('script-gen-status').textContent = '---';
+                document.getElementById('exec-engine-status').textContent = '---';
+                document.getElementById('adev-completeness').textContent = '---';
+                document.getElementById('adev-schema').textContent = '---';
+                document.getElementById('adev-drift').textContent = '---';
+                document.getElementById('adev-duplicates').textContent = '---';
+
+                // Initialize API cards to blank
+                for (let i = 1; i <= 3; i++) {
+                    updateSingleApiCard(i, document.getElementById(`api-name-${i}`).textContent, '---', 'Quality: ---', 'text-gray-500', 'text-gray-500');
+                }
+                
+                // --- Essential UI Component Declarations ---
+                const navButtons = document.querySelectorAll('.nav-btn');
+                const mainSections = document.querySelectorAll('.main-section');
+                
+                // --- SPA Tab Navigation Logic ---
+                function switchTab(targetId) {
+                    mainSections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+
+                    navButtons.forEach(button => {
+                        button.classList.remove('active-tab');
+                        if (button.dataset.target === targetId) {
+                            button.classList.add('active-tab');
+                        }
+                    });
+                }
+
+                navButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        switchTab(button.dataset.target);
+                    });
+                });
+                // --- End SPA Tab Navigation Logic ---
+
+                // --- Input Event Bindings for Tables (Filtering and Sorting) ---
+                document.getElementById('model-filter-input').addEventListener('input', filterAndSortModelTable);
+                document.getElementById('regional-filter-input').addEventListener('input', filterAndSortRegionalTable);
+                
+                document.querySelectorAll('#model-data-container .table-header').forEach(header => {
+                    header.addEventListener('click', function() {
+                        const newSortColumn = this.dataset.column;
+                        if (newSortColumn === modelSortColumn) {
+                            modelSortDirection = modelSortDirection === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            modelSortColumn = newSortColumn;
+                            modelSortDirection = 'asc';
+                        }
+                        filterAndSortModelTable();
+                    });
+                });
+
+                document.querySelectorAll('#regional-data-container .table-header').forEach(header => {
+                    header.addEventListener('click', function() {
+                        const newSortColumn = this.dataset.column;
+                        if (newSortColumn === regionalSortColumn) {
+                            regionalSortDirection = regionalSortDirection === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            regionalSortColumn = newSortColumn;
+                            regionalSortDirection = 'asc';
+                        }
+                        filterAndSortRegionalTable();
+                    });
+                });
+                // --- End Table Bindings ---
+                
+                // Final initial calls
+                filterAndSortRegionalTable(); 
+                filterAndSortModelTable();
+                switchTab('dashboard'); 
+            }
+
+            initializeUI(); 
+            
+        });
+    </script>
+</body>
+</html>
